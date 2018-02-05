@@ -468,6 +468,20 @@ int _modbus_receive_msg(modbus_t *ctx, uint8_t *msg, msg_type_t msg_type)
     if (ctx->debug)
         printf("\n");
 
+	// To correct problem if the firstbyte of frame is 0
+	int i;
+	if (msg[0] == 0)
+	{
+		for (i = 0; i < msg_length; i++)
+		{
+			msg[i] = msg[i+1];
+		}
+		msg_length -= 1;
+
+		if (ctx->debug)
+			printf("Trailing zero from first byte.\n");
+	}
+
     return ctx->backend->check_integrity(ctx, msg, msg_length);
 }
 
